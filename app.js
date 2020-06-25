@@ -7,7 +7,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const stuffRoutes = require('./routes/sauce');
+const sauceRoutes = require('./routes/sauce');
+const userRoutes = require('./routes/user');
 
 const app = express();
 mongoose.connect('mongodb+srv://tm:ie9BcJk5q9nacUvL@cluster0-cqn0u.mongodb.net/<dbname>?retryWrites=true&w=majority')
@@ -29,16 +30,16 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.post('/api/auth/login', (req, res, next) => {
-  //console.log(req.body);
-  res.status(201).json({
-    message: 'logged in'
+// app.post('/api/auth/login', (req, res, next) => {
+//   //console.log(req.body);
+//   res.status(201).json({
+//     message: 'logged in'
 
-  });
-});
+//   });
+// });
 
-app.use('/api/sauces', stuffRoutes);
-
+app.use('/api/sauces', sauceRoutes);
+app.use('/api/auth', userRoutes);
 
 // app.get('/api/sauces', (req, res, next) => {
 //   const sauce = [
