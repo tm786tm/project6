@@ -6,6 +6,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const path = require('path');
 
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
@@ -30,49 +31,9 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-// app.post('/api/auth/login', (req, res, next) => {
-//   //console.log(req.body);
-//   res.status(201).json({
-//     message: 'logged in'
-
-//   });
-// });
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
-
-// app.get('/api/sauces', (req, res, next) => {
-//   const sauce = [
-//     {
-//       _id: 'sdsdsdsd',
-//       userId: 'mildsaucesID',
-//       name: 'Mild sauce',
-//       manufacturer: 'Mild Peppers ltd',
-//       description: 'A mild sauces.',
-//       mainPepper: 'Green pepper',
-//       imageUrl: 'https://media.gettyimages.com/photos/hot-chili-peppers-picture-id183263273?s=612x612',
-//       heat: 5,
-//       likes: 7,
-//       dislikes: 5,
-//       usersLiked: ['asasa'],
-//       usersDisliked: ['Strisasang'],
-//     },
-//     {
-//       _id: 'dfgdfgf',
-//       userId: 'hotsaucesID',
-//       name: 'Hot sauce',
-//       manufacturer: 'Hot Peppers ltd',
-//       description: 'A Hot sauces.',
-//       mainPepper: 'Res pepper',
-//       imageUrl: 'https://media.gettyimages.com/photos/hot-chili-peppers-picture-id183263273?s=612x612',
-//       heat: 10,
-//       likes: 7,
-//       dislikes: 5,
-//       usersLiked: ['asasa'],
-//       usersDisliked: ['Strisasang'],
-//     },
-//   ];
-//   res.status(200).json(sauce);
-// });
 
 module.exports = app;

@@ -1,19 +1,21 @@
 const Sauce = require('../models/sauce');
+const fs = require('fs');
 
 exports.createSauce = (req, res, next) => {
-    console.log(req);
+    const url = req.protocol + '://' + req.get('host');
+    req.body.sauce = JSON.parse(req.body.sauce);
     const sauce = new Sauce({
-        userId: req.body.name,
-        name: req.body.name,
-        manufacturer: req.body.manufacturer,
-        description: req.body.description,
-        image: req.body.image,
-        mainPepper: req.body.mainPepper,
-        heat: req.body.heat,
+        userId: req.body.sauce.userId,
+        name: req.body.sauce.name,
+        manufacturer: req.body.sauce.manufacturer,
+        description: req.body.sauce.description,
+        imageUrl: url + '/images/' + req.file.filename,
+        mainPepper: req.body.sauce.mainPepper,
+        heat: req.body.sauce.heat,
         likes: 0,
         dislikes: 0,
-        usersLiked: [''],
-        usersDisliked: ['']
+        usersLiked: [],
+        usersDisliked: []
     });
 
     sauce.save().then(
@@ -48,15 +50,35 @@ exports.getOneSauce = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
-    const sauce = new Sauce({
-        //userId: req.body.userId,
-        name: req.body.name,
-        manufacturer: req.body.manufacturer,
-        description: req.body.description,
-        imageUrl: req.body.imageUrl,
-        mainPepper: req.body.mainPepper,
-        heat: req.body.heat,
-    });
+    let sauce = new Sauce({ _id: req.params._id });
+    if (req.file) {
+        const url = req.protocol + '://' + req.get('host');
+
+        req.body.sauce = JSON.parse(req.body.sauce);
+        sauce = {
+            _id: req.params.id,
+            userId: req.body.sauce.userId,
+            name: req.body.sauce.name,
+            manufacturer: req.body.sauce.manufacturer,
+            description: req.body.sauce.description,
+            imageUrl: url + '/images/' + req.file.filename,
+            mainPepper: req.body.sauce.mainPepper,
+            heat: req.body.sauce.heat,
+        };
+        console.log(req.body);
+    } else {
+        sauce = {
+            _id: req.params.id,
+            userId: req.body.userId,
+            name: req.body.name,
+            manufacturer: req.body.manufacturer,
+            description: req.body.description,
+            mainPepper: req.body.mainPepper,
+            heat: req.body.heat
+        };
+
+    }
+
     Sauce.updateOne({ _id: req.params.id }, sauce).then(
         () => {
             res.status(201).json({
@@ -73,16 +95,23 @@ exports.modifySauce = (req, res, next) => {
 };
 
 exports.deleteSauce = (req, res, next) => {
-    Sauce.deleteOne({ _id: req.params.id }).then(
-        () => {
-            res.status(200).json({
-                message: 'Deleted!'
-            });
-        }
-    ).catch(
-        (error) => {
-            res.status(400).json({
-                error: error
+    Sauce.findOne({ _id: req.params.id }).then(
+        (sauce) => {
+            const filename = sauce.imageUrl.split('/images/')[1];
+            fs.unlink('images/' + filename, () => {
+                Sauce.deleteOne({ _id: req.params.id }).then(
+                    () => {
+                        res.status(200).json({
+                            message: 'Deleted!'
+                        });
+                    }
+                ).catch(
+                    (error) => {
+                        res.status(400).json({
+                            error: error
+                        });
+                    }
+                );
             });
         }
     );
