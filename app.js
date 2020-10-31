@@ -11,8 +11,8 @@ const path = require('path');
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-const app = express();
-mongoose.connect('mongodb+srv://tm:ie9BcJk5q9nacUvL@cluster0-cqn0u.mongodb.net/<dbname>?retryWrites=true&w=majority')
+const app = express();    //connect to the mongoDB atlas database
+mongoose.connect('mongodb+srv://tm:ie9BcJk5q9nacUvL@cluster0-cqn0u.mongodb.net/hotSauces?retryWrites=true&w=majority')
   .then(() => {
     console.log('successfully connected to MongoDB Atlas!');
   })
@@ -22,7 +22,7 @@ mongoose.connect('mongodb+srv://tm:ie9BcJk5q9nacUvL@cluster0-cqn0u.mongodb.net/<
   });
 
 
-app.use((req, res, next) => {
+app.use((req, res, next) => {   //middleware to allow requests from all origins
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');

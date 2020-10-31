@@ -1,10 +1,12 @@
 const Sauce = require('../models/sauce');
 const fs = require('fs');
 
+
+//create sauce
 exports.createSauce = (req, res, next) => {
     const url = req.protocol + '://' + req.get('host');
     req.body.sauce = JSON.parse(req.body.sauce);
-    const sauce = new Sauce({
+    const sauce = new Sauce({   //create the sauce
         userId: req.body.sauce.userId,
         name: req.body.sauce.name,
         manufacturer: req.body.sauce.manufacturer,
@@ -18,13 +20,13 @@ exports.createSauce = (req, res, next) => {
         usersDisliked: []
     });
 
-    sauce.save().then(
+    sauce.save().then(  //save the sauce
         () => {
             res.status(201).json({
                 message: 'Post saved successfully!'
             });
         }
-    ).catch(
+    ).catch(    //catch errors and send 400 status
         (error) => {
             res.status(400).json({
                 error: error
@@ -33,6 +35,7 @@ exports.createSauce = (req, res, next) => {
     );
 };
 
+//get the single requested sauce using id
 exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({
         _id: req.params.id
@@ -49,19 +52,21 @@ exports.getOneSauce = (req, res, next) => {
     );
 };
 
-
+//code for like and dislike
 exports.likeSauce = (req, res, next) => {
-    Sauce.findOne({
+    Sauce.findOne({     //get the sauce
         _id: req.params.id
     }).then(
         (sauce) => {
-            if (req.body.like === 1) {
-                if (sauce.usersLiked.length === 0) {
-                    sauce.usersLiked.push(req.body.userId);
-                    sauce.likes += 1;
+            console.log('-----------------------------------');
+            if (req.body.like === 1) {          //if 1 is received from the frontend to add a like
+                if (sauce.usersLiked.length === 0) {        //execute if tere are 0 likes
+                    sauce.usersLiked.push(req.body.userId);     //add to the array
+                    sauce.likes += 1;                           //increment by 1
+                    console.log('New Like');
                 } else {
                     let alreadyLiked = false;
-                    for (let i = 0; i < sauce.usersLiked.length; i++) {
+                    for (let i = 0; i < sauce.usersLiked.length; i++) {     //To check if already liked
                         if (sauce.usersLiked[i] === req.body.userId) {
                             alreadyLiked = true;
                         }
@@ -74,10 +79,11 @@ exports.likeSauce = (req, res, next) => {
                 }
             }
 
-            if (req.body.like === -1) {
+            if (req.body.like === -1) {         //if -1 is received from the frontend to add a dislike
                 if (sauce.usersDisliked.length === 0) {
                     sauce.usersDisliked.push(req.body.userId);
                     sauce.dislikes += 1;
+                    console.log('New dislike');
                 } else {
                     let alreadyDisliked = false;
                     for (let i = 0; i < sauce.usersDisliked.length; i++) {
@@ -93,8 +99,8 @@ exports.likeSauce = (req, res, next) => {
                 }
             }
 
-            if (req.body.like === 0) {
-                if (sauce.usersLiked.length > 0) {
+            if (req.body.like === 0) {          //if 0 is received from the frontend to remove a like or dislike
+                if (sauce.usersLiked.length > 0) {      //only execute if not empty
                     for (let i = 0; i < sauce.usersLiked.length; i++) {
                         if (sauce.usersLiked[i] === req.body.userId) {
                             sauce.likes -= 1;
@@ -113,15 +119,15 @@ exports.likeSauce = (req, res, next) => {
                     }
                 }
             }
-
+            
             console.log(sauce.likes + ' like ' + 'and ' + sauce.dislikes + ' dislikes.');
             console.log('Liked by ' + sauce.usersLiked);
             console.log('Disliked by ' + sauce.usersDisliked);
             console.log('-----------------------------------');
-            Sauce.updateOne({ _id: req.params.id }, sauce).then(
+            Sauce.updateOne({ _id: req.params.id }, sauce).then(        //method used to update the record
                 () => {
-                    res.status(201).json({
-                        message: 'Thing updated successfully!'
+                    res.status(201).json({          //on success give a a 201 status code
+                        message: 'Sauce updated successfully!'
                     });
                 }
             ).catch(
@@ -148,7 +154,10 @@ exports.modifySauce = (req, res, next) => {
         const url = req.protocol + '://' + req.get('host');
 
         req.body.sauce = JSON.parse(req.body.sauce);
-        sauce = {
+
+                //user inputs passed and saved from te frontend
+        
+        sauce = {                   
             _id: req.params.id,
             userId: req.body.sauce.userId,
             name: req.body.sauce.name,
@@ -175,7 +184,7 @@ exports.modifySauce = (req, res, next) => {
     Sauce.updateOne({ _id: req.params.id }, sauce).then(
         () => {
             res.status(201).json({
-                message: 'Thing updated successfully!'
+                message: 'Sauce updated successfully!'
             });
         }
     ).catch(
@@ -191,8 +200,8 @@ exports.deleteSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id }).then(
         (sauce) => {
             const filename = sauce.imageUrl.split('/images/')[1];
-            fs.unlink('images/' + filename, () => {
-                Sauce.deleteOne({ _id: req.params.id }).then(
+            fs.unlink('images/' + filename, () => {             //delete the image
+                Sauce.deleteOne({ _id: req.params.id }).then(   //delete the record
                     () => {
                         res.status(200).json({
                             message: 'Deleted!'
